@@ -82,14 +82,16 @@ def render_from_matrix(surf: Surface, matrix: dict[int, Surface], pos: tuple[int
     x, y = pos
     camera_rotation_radians = math.radians(camera.rotation)
 
-    screen_center_x = surf.get_width() // 2
-    screen_center_y = surf.get_height() // 2
+    camera_center_x = camera.offset[0] + display.get_width() // 2
+    camera_center_y = camera.offset[1] + display.get_height() // 2
 
-    offset_x = (x - screen_center_x) * math.cos(camera_rotation_radians) - (y - screen_center_y) * math.sin(camera_rotation_radians) + camera.offset[0]
-    offset_y = (x - screen_center_x) * math.sin(camera_rotation_radians) + (y - screen_center_y) * math.cos(camera_rotation_radians) + camera.offset[1]
+    # Calculate the offset from the center of the camera
+    offset_x = (x - camera_center_x) * math.cos(camera_rotation_radians) - (y - camera_center_y) * math.sin(camera_rotation_radians)
+    offset_y = (x - camera_center_x) * math.sin(camera_rotation_radians) + (y - camera_center_y) * math.cos(camera_rotation_radians)
 
-    render_x = int(screen_center_x + offset_x - img.get_width() // 2)
-    render_y = int(screen_center_y + offset_y - img.get_height() // 2)
+    # Calculate the final rendering position relative to the center of the screen
+    render_x = int(display.get_width() // 2 + offset_x - img.get_width() // 2)
+    render_y = int(display.get_height() // 2 + offset_y - img.get_height() // 2)
 
     surf.blit(img, (render_x, render_y))
 
@@ -99,24 +101,43 @@ def make_asset_map(asset_path: str = ASSET_PATH) -> dict[str, dict[int, Surface]
 
 
 asset_map = make_asset_map()
+cube = asset_map['cute_cube']
 frame = 0
 
 camera = Camera([0,0], 0)
+
+def distance_from_camera(pos: tuple[int, int]):
+    rot = math.radians(camera.rotation)
+    sin = math.sin(rot)
+    cos = math.cos(rot)
+    if cos < 0 and sin < 0:
+        return -pos[1] + -pos[0]
+    elif cos < 0:
+        return -pos[1]
+    elif sin < 0:
+        return -pos[0]
+    return pos[1]
+
+size = 24
+map = []
+for y in range(12):
+    for x in range(20):
+        map.append((x, y))
 
 while True:
     current_rotation = frame // DEBUG_ROTATION_SPEED % MAX_ROTATIONS
     display.fill((0,0,0))
     frame += 1
 
-    i = 0
-    for key, asset in asset_map.items():
-        i += 1
-        render_from_matrix(display, asset, (75 * i, display.get_height() // 2), 0, camera)
+    for x, y in sorted(map, key=distance_from_camera):
+        render_from_matrix(display, cube, (x * size, y * size), 0, camera)
 
     rotation_debug = font_renderer.render(f'rotation: {get_rotation_index(camera.rotation)}', False, (255,255,255))
     asset_debug = font_renderer.render(f'assets loaded: {len(asset_map)}', False, (255,255,255))
+    camera_debug = font_renderer.render(f'camera rotation: {camera.rotation}. camera sin/cos: {math.sin(math.radians(camera.rotation)):.2f}/{math.cos(math.radians(camera.rotation)):.2f}', False, (255,255,255))
     display.blit(rotation_debug, (0,0))
     display.blit(asset_debug, (0, DEBUG_FONT_SIZE + DEBUG_MARGIN))
+    display.blit(camera_debug, (0, DEBUG_FONT_SIZE*2 + DEBUG_MARGIN))
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -133,17 +154,24 @@ while True:
     if keys[pygame.K_e]:
         camera.rotation += camera.ROTATION_SPEED
 
+    movement_speed = 10
+    movement_vector = pygame.Vector2(0, 0)
+
     if keys[pygame.K_a]:
-        camera.offset[0] += 10
+        movement_vector.x -= movement_speed
 
     if keys[pygame.K_d]:
-        camera.offset[0] -= 10
+        movement_vector.x += movement_speed
 
     if keys[pygame.K_w]:
-        camera.offset[1] += 10
+        movement_vector.y -= movement_speed
 
     if keys[pygame.K_s]:
-        camera.offset[1] -= 10
+        movement_vector.y += movement_speed
+
+    rotated_movement_vector = movement_vector.rotate(-camera.rotation)
+    camera.offset[0] += rotated_movement_vector.x
+    camera.offset[1] += rotated_movement_vector.y
 
     screen.blit(pygame.transform.scale(display, screen.get_size()), (0,0))
     pygame.display.update()
