@@ -28,7 +28,7 @@ clock = pygame.time.Clock()
 class Camera:
     ROTATION_SPEED: int = 2
 
-    def __init__(self, offset: list[int, int], rotation: int) -> None:
+    def __init__(self, offset: list[int], rotation: int) -> None:
         self.offset = offset
         self.rotation = rotation
 
@@ -170,8 +170,8 @@ while True:
         movement_vector.y += movement_speed
 
     rotated_movement_vector = movement_vector.rotate(-camera.rotation)
-    camera.offset[0] += rotated_movement_vector.x
-    camera.offset[1] += rotated_movement_vector.y
+    camera.offset[0] += int(rotated_movement_vector.x)
+    camera.offset[1] += int(rotated_movement_vector.y)
 
     screen.blit(pygame.transform.scale(display, screen.get_size()), (0,0))
     pygame.display.update()
