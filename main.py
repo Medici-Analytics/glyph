@@ -3,14 +3,20 @@ import sys
 import os
 
 import pygame
+import pygame.font
 from pygame import Surface
 
+
+
 pygame.init()
+pygame.font.init()
 
 MAX_ROTATIONS = 16
 
 screen = pygame.display.set_mode((500, 500), 0, 32)
 display = pygame.Surface((100,100))
+
+font_renderer = pygame.font.SysFont("Arial", 12)
 
 clock = pygame.time.Clock()
 
@@ -62,9 +68,13 @@ frame = 0
 image_matrix = make_rotation_matrix(images)
 
 while True:
+    current_rotation = frame // 10 % MAX_ROTATIONS
     display.fill((0,0,0))
     frame += 1
-    render_from_matrix(display, image_matrix, (display.get_width() // 2, display.get_height() // 2), frame // 10 % MAX_ROTATIONS)
+
+    render_from_matrix(display, image_matrix, (display.get_width() // 2, display.get_height() // 2), current_rotation)
+    rotation_debug = font_renderer.render(f'rotation: {current_rotation}', False, (255,255,255))
+    display.blit(rotation_debug, (0,0))
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
