@@ -12,7 +12,7 @@ from pygame import Surface
 pygame.init()
 pygame.font.init()
 
-MAX_ROTATIONS = 100
+MAX_ROTATIONS = 90
 DEBUG_FONT_SIZE = 14
 DEBUG_MARGIN = 2
 DEBUG_ROTATION_SPEED = 10
@@ -73,7 +73,7 @@ def render_stack(surf: Surface, images: list[Surface], pos: tuple[int, int], rot
 def get_rotation_index(degrees: int) -> int:
     return int(-degrees * MAX_ROTATIONS // 360) % MAX_ROTATIONS
 
-def render_from_matrix(surf: Surface, matrix: dict[int, Surface], pos: tuple[int, int], rotation: int, camera: Camera) -> None:
+def render_from_matrix(surf: Surface, matrix: dict[int, Surface], pos: tuple[int, int], rotation: int, camera: Camera, height: int = 0) -> None:
     rotation_offset = get_rotation_index(camera.rotation)
     final_rotation = (rotation + rotation_offset) % MAX_ROTATIONS
 
@@ -87,7 +87,7 @@ def render_from_matrix(surf: Surface, matrix: dict[int, Surface], pos: tuple[int
 
     # Calculate the offset from the center of the camera
     offset_x = (x - camera_center_x) * math.cos(camera_rotation_radians) - (y - camera_center_y) * math.sin(camera_rotation_radians)
-    offset_y = (x - camera_center_x) * math.sin(camera_rotation_radians) + (y - camera_center_y) * math.cos(camera_rotation_radians)
+    offset_y = (x - camera_center_x) * math.sin(camera_rotation_radians) + (y - camera_center_y) * math.cos(camera_rotation_radians) - height
 
     # Calculate the final rendering position relative to the center of the screen
     render_x = int(display.get_width() // 2 + offset_x - img.get_width() // 2)
@@ -102,6 +102,7 @@ def make_asset_map(asset_path: str = ASSET_PATH) -> dict[str, dict[int, Surface]
 
 asset_map = make_asset_map()
 cube = asset_map['cute_cube']
+knight = asset_map['chr_knight']
 frame = 0
 
 camera = Camera([0,0], MAX_ROTATIONS//2)
@@ -131,6 +132,9 @@ while True:
 
     for x, y in sorted(map, key=distance_from_camera):
         render_from_matrix(display, cube, (x * size, y * size), 0, camera)
+
+    for x, y in sorted(map, key=distance_from_camera):
+        render_from_matrix(display, knight, (x * size, y * size), 0, camera, size)
 
     rotation_debug = font_renderer.render(f'rotation: {get_rotation_index(camera.rotation)}', False, (255,255,255))
     asset_debug = font_renderer.render(f'assets loaded: {len(asset_map)}', False, (255,255,255))
