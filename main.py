@@ -26,6 +26,8 @@ font_renderer = pygame.font.SysFont("Arial", DEBUG_FONT_SIZE)
 clock = pygame.time.Clock()
 
 class Camera:
+    ROTATION_SPEED: int = 2
+
     def __init__(self, offset: list[int, int], rotation: int) -> None:
         self.offset = offset
         self.rotation = rotation
@@ -121,27 +123,27 @@ while True:
             pygame.quit()
             sys.exit()
 
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_ESCAPE:
-                pygame.quit()
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_ESCAPE]:
+        pygame.quit()
 
-            if event.key == pygame.K_q:
-                camera.rotation -= 10
+    if keys[pygame.K_q]:
+        camera.rotation -= camera.ROTATION_SPEED
 
-            if event.key == pygame.K_e:
-                camera.rotation += 10
+    if keys[pygame.K_e]:
+        camera.rotation += camera.ROTATION_SPEED
 
-            if event.key == pygame.K_a:
-                camera.offset[0] -= 10
+    if keys[pygame.K_a]:
+        camera.offset[0] += 10
 
-            if event.key == pygame.K_d:
-                camera.offset[0] += 10
+    if keys[pygame.K_d]:
+        camera.offset[0] -= 10
 
-            if event.key == pygame.K_w:
-                camera.offset[1] -= 10
+    if keys[pygame.K_w]:
+        camera.offset[1] += 10
 
-            if event.key == pygame.K_s:
-                camera.offset[1] += 10
+    if keys[pygame.K_s]:
+        camera.offset[1] -= 10
 
     screen.blit(pygame.transform.scale(display, screen.get_size()), (0,0))
     pygame.display.update()
