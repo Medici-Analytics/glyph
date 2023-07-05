@@ -11,14 +11,16 @@ from pygame import Surface
 pygame.init()
 pygame.font.init()
 
-MAX_ROTATIONS = 16
+MAX_ROTATIONS = 32
+DEBUG_FONT_SIZE = 14
+DEBUG_MARGIN = 2
 DEBUG_ROTATION_SPEED = 10
 ASSET_PATH = 'assets/'
 
-screen = pygame.display.set_mode((500, 500), 0, 32)
-display = pygame.Surface((100,100))
+screen = pygame.display.set_mode((720, 720), 0, 32)
+display = pygame.Surface((500,500))
 
-font_renderer = pygame.font.SysFont("Arial", 12)
+font_renderer = pygame.font.SysFont("Arial", DEBUG_FONT_SIZE)
 
 clock = pygame.time.Clock()
 
@@ -49,7 +51,7 @@ def split_stylesheet_into_chunks(stylesheet_path: str) -> list[Surface]:
 def make_rotation_matrix(images: list[Surface], spread: int = 1) -> dict[int, Surface]:
     rotations: dict[int, Surface] = {}
     for rotation in range(0, MAX_ROTATIONS):
-        rotation_surface = Surface((images[0].get_width() * 2, images[0].get_height() + len(images) * spread * 2), pygame.SRCALPHA)
+        rotation_surface = Surface((images[0].get_width() * 2, images[0].get_height() + len(images) * spread * 3), pygame.SRCALPHA)
         render_stack(rotation_surface, images, (rotation_surface.get_width() // 2, rotation_surface.get_height() // 2), int(rotation / MAX_ROTATIONS * 360))
         rotations[rotation] = rotation_surface
 
@@ -77,10 +79,15 @@ while True:
     display.fill((0,0,0))
     frame += 1
 
-    render_from_matrix(display, asset_map['cute_cube'], (display.get_width() // 2 - 12, display.get_height() // 2), current_rotation)
-    render_from_matrix(display, asset_map['chr_knight'], (display.get_width() // 2 + 12, display.get_height() // 2), current_rotation)
+    i = 0
+    for key, asset in asset_map.items():
+        i += 1
+        render_from_matrix(display, asset, (75 * i, display.get_height() // 2), current_rotation)
+
     rotation_debug = font_renderer.render(f'rotation: {current_rotation}', False, (255,255,255))
+    asset_debug = font_renderer.render(f'assets loaded: {len(asset_map)}', False, (255,255,255))
     display.blit(rotation_debug, (0,0))
+    display.blit(asset_debug, (0, DEBUG_FONT_SIZE + DEBUG_MARGIN))
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
