@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import sys
 import os
+import math
 
 import pygame
 import pygame.font
@@ -62,9 +63,28 @@ def render_stack(surf: Surface, images: list[Surface], pos: tuple[int, int], rot
         rotated_img = pygame.transform.rotate(img, rotation)
         surf.blit(rotated_img, (pos[0] - rotated_img.get_width() // 2, pos[1] - rotated_img.get_height() // 2 - i * spread))
 
-def render_from_matrix(surf: Surface, matrix: dict[int, Surface], pos:tuple[int, int], rotation: int) -> None:
-    img = matrix[rotation]
-    surf.blit(img, (pos[0] - img.get_width() // 2, pos[1] - img.get_height() // 2))
+def get_rotation_index(degrees: int) -> int:
+    return int(-degrees * MAX_ROTATIONS // 360) % MAX_ROTATIONS
+
+def render_from_matrix(surf: Surface, matrix: dict[int, Surface], pos: tuple[int, int], rotation: int, camera_rotation: int) -> None:
+    rotation_offset = get_rotation_index(camera_rotation)
+    final_rotation = (rotation + rotation_offset) % MAX_ROTATIONS
+
+    img = matrix[final_rotation]
+
+    x, y = pos
+    camera_rotation_radians = math.radians(camera_rotation)
+
+    screen_center_x = surf.get_width() // 2
+    screen_center_y = surf.get_height() // 2
+
+    offset_x = (x - screen_center_x) * math.cos(camera_rotation_radians) - (y - screen_center_y) * math.sin(camera_rotation_radians)
+    offset_y = (x - screen_center_x) * math.sin(camera_rotation_radians) + (y - screen_center_y) * math.cos(camera_rotation_radians)
+
+    render_x = int(screen_center_x + offset_x - img.get_width() // 2)
+    render_y = int(screen_center_y + offset_y - img.get_height() // 2)
+
+    surf.blit(img, (render_x, render_y))
 
 def make_asset_map(asset_path: str = ASSET_PATH) -> dict[str, dict[int, Surface]]:
     assert asset_path.endswith('/'), "asset path must end with '/' to signify directory path."
@@ -73,6 +93,7 @@ def make_asset_map(asset_path: str = ASSET_PATH) -> dict[str, dict[int, Surface]
 
 asset_map = make_asset_map()
 frame = 0
+forced_rotation = 0
 
 while True:
     current_rotation = frame // DEBUG_ROTATION_SPEED % MAX_ROTATIONS
@@ -82,9 +103,9 @@ while True:
     i = 0
     for key, asset in asset_map.items():
         i += 1
-        render_from_matrix(display, asset, (75 * i, display.get_height() // 2), current_rotation)
+        render_from_matrix(display, asset, (75 * i, display.get_height() // 2), 0, forced_rotation)
 
-    rotation_debug = font_renderer.render(f'rotation: {current_rotation}', False, (255,255,255))
+    rotation_debug = font_renderer.render(f'rotation: {get_rotation_index(forced_rotation)}', False, (255,255,255))
     asset_debug = font_renderer.render(f'assets loaded: {len(asset_map)}', False, (255,255,255))
     display.blit(rotation_debug, (0,0))
     display.blit(asset_debug, (0, DEBUG_FONT_SIZE + DEBUG_MARGIN))
@@ -93,6 +114,12 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_q:
+                forced_rotation -= 10
+
+            if event.key == pygame.K_e:
+                forced_rotation += 10
 
     screen.blit(pygame.transform.scale(display, screen.get_size()), (0,0))
     pygame.display.update()
