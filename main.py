@@ -12,6 +12,8 @@ pygame.init()
 pygame.font.init()
 
 MAX_ROTATIONS = 16
+DEBUG_ROTATION_SPEED = 10
+ASSET_PATH = 'assets/'
 
 screen = pygame.display.set_mode((500, 500), 0, 32)
 display = pygame.Surface((100,100))
@@ -47,7 +49,7 @@ def split_stylesheet_into_chunks(stylesheet_path: str) -> list[Surface]:
 def make_rotation_matrix(images: list[Surface], spread: int = 1) -> dict[int, Surface]:
     rotations: dict[int, Surface] = {}
     for rotation in range(0, MAX_ROTATIONS):
-        rotation_surface = Surface((images[0].get_width(), images[0].get_height() + len(images)* spread))
+        rotation_surface = Surface((images[0].get_width() * 2, images[0].get_height() + len(images) * spread * 2), pygame.SRCALPHA)
         render_stack(rotation_surface, images, (rotation_surface.get_width() // 2, rotation_surface.get_height() // 2), int(rotation / MAX_ROTATIONS * 360))
         rotations[rotation] = rotation_surface
 
@@ -62,17 +64,21 @@ def render_from_matrix(surf: Surface, matrix: dict[int, Surface], pos:tuple[int,
     img = matrix[rotation]
     surf.blit(img, (pos[0] - img.get_width() // 2, pos[1] - img.get_height() // 2))
 
-images = split_stylesheet_into_chunks("./assets/chr_knight.png")
+def make_asset_map(asset_path: str = ASSET_PATH) -> dict[str, dict[int, Surface]]:
+    assert asset_path.endswith('/'), "asset path must end with '/' to signify directory path."
+    return {img.replace(".png", ''): make_rotation_matrix(split_stylesheet_into_chunks(asset_path + img)) for img in os.listdir(asset_path)}
+
+
+asset_map = make_asset_map()
 frame = 0
 
-image_matrix = make_rotation_matrix(images)
-
 while True:
-    current_rotation = frame // 10 % MAX_ROTATIONS
+    current_rotation = frame // DEBUG_ROTATION_SPEED % MAX_ROTATIONS
     display.fill((0,0,0))
     frame += 1
 
-    render_from_matrix(display, image_matrix, (display.get_width() // 2, display.get_height() // 2), current_rotation)
+    render_from_matrix(display, asset_map['cute_cube'], (display.get_width() // 2 - 12, display.get_height() // 2), current_rotation)
+    render_from_matrix(display, asset_map['chr_knight'], (display.get_width() // 2 + 12, display.get_height() // 2), current_rotation)
     rotation_debug = font_renderer.render(f'rotation: {current_rotation}', False, (255,255,255))
     display.blit(rotation_debug, (0,0))
 
