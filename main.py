@@ -17,11 +17,11 @@ def split_stylesheet_into_chunks(stylesheet_path: str) -> list[Surface]:
     stylesheet = pygame.image.load(stylesheet_path)
     stylesheet_width, stylesheet_height = stylesheet.get_size()
     chunk_size = stylesheet_width
-    
+
     num_chunks_rows = stylesheet_height // stylesheet_width
-    
+
     surfaces = []
-    
+
     for chunk_row in range(num_chunks_rows):
         start_x = 0
         end_x = start_x + chunk_size
@@ -29,11 +29,11 @@ def split_stylesheet_into_chunks(stylesheet_path: str) -> list[Surface]:
         end_y = start_y + chunk_size
 
         chunk_surface = pygame.Surface((chunk_size, chunk_size), pygame.SRCALPHA) # needs to have alphachannel or transparency overrides when blit
-        
+
         chunk_surface.blit(stylesheet, (0, 0), (start_x, start_y, end_x, end_y))
-        
+
         surfaces.append(chunk_surface)
-    
+
     surfaces.reverse()
     return surfaces
 
@@ -54,7 +54,7 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
-        
+
     screen.blit(pygame.transform.scale(display, screen.get_size()), (0,0))
     pygame.display.update()
     clock.tick(60)
