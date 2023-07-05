@@ -7,6 +7,7 @@ from pygame import Surface
 
 pygame.init()
 
+MAX_ROTATIONS = 16
 
 screen = pygame.display.set_mode((500, 500), 0, 32)
 display = pygame.Surface((100,100))
@@ -37,18 +38,33 @@ def split_stylesheet_into_chunks(stylesheet_path: str) -> list[Surface]:
     surfaces.reverse()
     return surfaces
 
-def render_stack(surf: Surface, images: list[Surface], pos: tuple[int, int], rotation:int, spread: int =1):
+def make_rotation_matrix(images: list[Surface], spread: int = 1) -> dict[int, Surface]:
+    rotations: dict[int, Surface] = {}
+    for rotation in range(0, MAX_ROTATIONS):
+        rotation_surface = Surface((images[0].get_width(), images[0].get_height() + len(images)* spread))
+        render_stack(rotation_surface, images, (rotation_surface.get_width() // 2, rotation_surface.get_height() // 2), int(rotation / MAX_ROTATIONS * 360))
+        rotations[rotation] = rotation_surface
+
+    return rotations
+
+def render_stack(surf: Surface, images: list[Surface], pos: tuple[int, int], rotation:int, spread: int =1) -> None:
     for i, img in enumerate(images):
         rotated_img = pygame.transform.rotate(img, rotation)
         surf.blit(rotated_img, (pos[0] - rotated_img.get_width() // 2, pos[1] - rotated_img.get_height() // 2 - i * spread))
 
+def render_from_matrix(surf: Surface, matrix: dict[int, Surface], pos:tuple[int, int], rotation: int) -> None:
+    img = matrix[rotation]
+    surf.blit(img, (pos[0] - img.get_width() // 2, pos[1] - img.get_height() // 2))
+
 images = split_stylesheet_into_chunks("./assets/chr_knight.png")
 frame = 0
+
+image_matrix = make_rotation_matrix(images)
 
 while True:
     display.fill((0,0,0))
     frame += 1
-    render_stack(display, images, (display.get_width() // 2,display.get_height() // 2), frame)
+    render_from_matrix(display, image_matrix, (display.get_width() // 2, display.get_height() // 2), frame // 10 % MAX_ROTATIONS)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
