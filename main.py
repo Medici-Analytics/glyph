@@ -104,9 +104,9 @@ asset_map = make_asset_map()
 cube = asset_map['cute_cube']
 frame = 0
 
-camera = Camera([0,0], 0)
+camera = Camera([0,0], MAX_ROTATIONS//2)
 
-def distance_from_camera(pos: tuple[int, int]):
+def distance_from_camera(pos: tuple[int, int]) -> int:
     rot = math.radians(camera.rotation)
     sin = math.sin(rot)
     cos = math.cos(rot)
