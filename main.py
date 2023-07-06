@@ -44,14 +44,11 @@ for y in range(8):
 sock = client.make_socket()
 client.run(sock)
 selector = Selector(asset_map['green_cube'], Vector2(), engine)
-frame = 0
 cube = asset_map['cute_cube']
 knight = asset_map['chr_knight']
 
 while True:
-    current_rotation = frame // DEBUG_ROTATION_SPEED % MAX_ROTATIONS
     display.fill((0,0,0))
-    frame += 1
 
     for x, y in sorted(map, key=camera.by_furthest_away):
         engine.render_from_matrix(display, cube, (x * size, y * size), 0, camera)
