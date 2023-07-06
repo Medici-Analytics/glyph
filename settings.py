@@ -4,11 +4,22 @@ from enum import IntEnum, auto
 
 PORT = 2313
 
+
+class END(IntEnum):
+    WHITE_MATE = auto()
+    BLACK_MATE = auto()
+    TIE = auto()
+    DRAW = auto()
+    INSUFFICIENT_MATERIAL = auto()
+
 class Instructions(IntEnum):
     GREET = auto()
     CHAT = auto()
     DISCONNECT = auto()
     BOARD = auto()
+    MOVE = auto()
+    MATE = auto()
+    INVALID_MOVE = auto()
 
 class Data:
     def __init__(self, instruction: Instructions, data: bytes) -> None:

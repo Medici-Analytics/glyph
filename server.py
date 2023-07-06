@@ -3,10 +3,35 @@ from __future__ import annotations
 
 import socket
 import threading
-from settings import Data, Instructions, PORT
+from settings import Data, Instructions, PORT, END
 
+class Board:
+    ...
+
+    def serialize(self) -> bytes:
+        ...
+
+    @property
+    def is_mate(self) -> bytes:
+        ...
+
+    @property
+    def white_won(self) -> bytes:
+        ...
+
+board = Board()
 client_lock = threading.Lock()
 clients_connected: list[socket.socket] = []
+
+
+def broadcast(data: Data) -> None:
+    [ client.send(data.serialize()) for client in clients_connected]
+
+def validate_move(move: str) -> bool:
+    ...
+
+def perform_move(board: Board, move: str):
+    ...
 
 def handle_client(client_socket: socket.socket, client_address: ...) -> None:
     with client_lock:
@@ -20,8 +45,22 @@ def handle_client(client_socket: socket.socket, client_address: ...) -> None:
         packet = Data.deserialize(data)
         print(packet.data)
         if packet.instructions == Instructions.CHAT:
-            [ client.send(packet.serialize()) for client in clients_connected]
+            broadcast(packet)
             print('sending')
+
+        if packet.instructions == Instructions.MOVE:
+            move = packet.data.decode()
+            if not validate_move(move):
+                print(f'invalid move: {move}')
+                response = Data(Instructions.INVALID_MOVE, b"invalid move")
+                client_socket.send(response.serialize())
+                pass
+
+            perform_move(board, move)
+            if board.is_mate:
+                broadcast(Data(Instructions.MATE, (END.WHITE_MATE if board.white_won else END.BLACK_MATE).to_bytes()))
+            else:
+                broadcast(Data(Instructions.BOARD, board.serialize()))
 
     with client_lock:
         clients_connected.remove(client_socket)
