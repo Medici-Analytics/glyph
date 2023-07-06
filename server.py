@@ -30,7 +30,7 @@ def broadcast(data: Data) -> None:
 def validate_move(move: str) -> bool:
     ...
 
-def perform_move(board: Board, move: str):
+def perform_move(board: Board, move: str) -> None:
     ...
 
 def handle_client(client_socket: socket.socket, client_address: ...) -> None:

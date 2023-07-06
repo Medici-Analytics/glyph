@@ -5,7 +5,7 @@ import math
 
 import pygame
 import pygame.font
-from pygame import Surface
+from pygame import Surface, Vector2
 
 import client
 from settings import Instructions
@@ -33,6 +33,49 @@ class Camera:
     def __init__(self, offset: list[int], rotation: int) -> None:
         self.offset = offset
         self.rotation = rotation
+
+class Selector:
+    MOVE_DELAY = 1400
+    MOVE_INTERVAL = 200
+    HEIGHT = 24
+
+    def __init__(self, asset: dict[int, Surface], position: Vector2, step_size: int = 24) -> None:
+        self.asset = asset
+        self.position = position
+        self.movement_vector = Vector2()
+        self.move_timer = 0
+        self.step_size = step_size
+
+    def handle_event(self, keys) -> None:
+        if keys[pygame.K_LEFT]:
+            self.movement_vector.x = -self.step_size
+
+        elif keys[pygame.K_RIGHT]:
+            self.movement_vector.x = self.step_size
+
+        else:
+            self.movement_vector.x = 0
+
+        if keys[pygame.K_UP]:
+            self.movement_vector.y = -self.step_size
+
+        elif keys[pygame.K_DOWN]:
+            self.movement_vector.y = self.step_size
+
+        else:
+            self.movement_vector.y = 0
+
+
+    def update(self) -> None:
+        current_time = pygame.time.get_ticks()
+
+        if self.movement_vector.length() > 0 and current_time - self.move_timer > Selector.MOVE_INTERVAL:
+            self.position += self.movement_vector
+            self.move_timer = current_time
+
+
+    def render(self, dest: Surface, camera: Camera) -> None:
+        render_from_matrix(dest, self.asset, (self.position.x, self.position.y), 0, camera, Selector.HEIGHT)
 
 def split_stylesheet_into_chunks(stylesheet_path: str) -> list[Surface]:
     stylesheet = pygame.image.load(stylesheet_path)
@@ -75,7 +118,7 @@ def render_stack(surf: Surface, images: list[Surface], pos: tuple[int, int], rot
 def get_rotation_index(degrees: int) -> int:
     return int(-degrees * MAX_ROTATIONS // 360) % MAX_ROTATIONS
 
-def render_from_matrix(surf: Surface, matrix: dict[int, Surface], pos: tuple[int, int], rotation: int, camera: Camera, height: int = 0) -> None:
+def render_from_matrix(surf: Surface, matrix: dict[int, Surface], pos: tuple[int | float, int | float], rotation: int, camera: Camera, height: int = 0) -> None:
     rotation_offset = get_rotation_index(camera.rotation)
     final_rotation = (rotation + rotation_offset) % MAX_ROTATIONS
 
@@ -129,6 +172,7 @@ for y in range(8):
 
 sock = client.make_socket()
 client.run(sock)
+selector = Selector(asset_map['green_cube'], Vector2())
 
 while True:
     current_rotation = frame // DEBUG_ROTATION_SPEED % MAX_ROTATIONS
@@ -140,6 +184,7 @@ while True:
 
     for x, y in sorted(map, key=distance_from_camera):
         render_from_matrix(display, knight, (x * size, y * size), 0, camera, size)
+
 
     rotation_debug = font_renderer.render(f'rotation: {get_rotation_index(camera.rotation)}', False, (255,255,255))
     asset_debug = font_renderer.render(f'assets loaded: {len(asset_map)}', False, (255,255,255))
@@ -165,6 +210,7 @@ while True:
 
     movement_speed = 10
     movement_vector = pygame.Vector2(0, 0)
+    selector_movement_vector = pygame.Vector2(0,0)
 
     if keys[pygame.K_a]:
         movement_vector.x -= movement_speed
@@ -181,6 +227,15 @@ while True:
     if keys[pygame.K_BACKSPACE]:
         data = Data(Instructions.CHAT, b'yo, testing')
         sock.sendall(data.serialize())
+
+    selector.handle_event(keys)
+    selector.update()
+    selector.render(display, camera)
+
+    rotated_movement_vector = movement_vector.rotate(-camera.rotation)
+
+    selector.position.x += selector_movement_vector.x
+    selector.position.y += selector_movement_vector.y
 
     camera.offset[0] += int(rotated_movement_vector.x)
     camera.offset[1] += int(rotated_movement_vector.y)
