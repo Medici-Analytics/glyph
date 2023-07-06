@@ -8,8 +8,6 @@ from camera import Camera
 
 
 class Engine:
-    ASSET_PATH: str = 'assets/'
-
     def __init__(self, display: Surface, max_rotations: int = 90) -> None:
         self.display = display
         self.max_rotations = max_rotations

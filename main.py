@@ -33,7 +33,7 @@ font_renderer = pygame.font.SysFont("Arial", DEBUG_FONT_SIZE)
 clock = pygame.time.Clock()
 engine = Engine(display, MAX_ROTATIONS)
 camera = Camera([0,0], 45)
-asset_map = engine.make_asset_map(Engine.ASSET_PATH)
+asset_map = engine.make_asset_map(ASSET_PATH)
 
 
 
