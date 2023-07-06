@@ -7,7 +7,9 @@ import pygame
 import pygame.font
 from pygame import Surface
 
-
+import client
+from settings import Instructions
+from settings import Data
 
 pygame.init()
 pygame.font.init()
@@ -18,8 +20,8 @@ DEBUG_MARGIN = 2
 DEBUG_ROTATION_SPEED = 10
 ASSET_PATH = 'assets/'
 
-screen = pygame.display.set_mode((1920, 1080), 0, 32)
-display = pygame.Surface((720,720))
+screen = pygame.display.set_mode((720, 720), 0, 32)
+display = pygame.Surface((360,360))
 
 font_renderer = pygame.font.SysFont("Arial", DEBUG_FONT_SIZE)
 
@@ -121,9 +123,12 @@ def distance_from_camera(pos: tuple[int, int]) -> int:
 
 size = 24
 map = []
-for y in range(12):
-    for x in range(20):
+for y in range(8):
+    for x in range(8):
         map.append((x, y))
+
+sock = client.make_socket()
+client.run(sock)
 
 while True:
     current_rotation = frame // DEBUG_ROTATION_SPEED % MAX_ROTATIONS
@@ -172,6 +177,11 @@ while True:
 
     if keys[pygame.K_s]:
         movement_vector.y += movement_speed
+
+    if keys[pygame.K_BACKSPACE]:
+        data = Data(Instructions.CHAT, b'yo, testing')
+        sock.sendall(data.serialize())
+
 
     rotated_movement_vector = movement_vector.rotate(-camera.rotation)
     camera.offset[0] += int(rotated_movement_vector.x)
