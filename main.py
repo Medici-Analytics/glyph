@@ -35,20 +35,6 @@ engine = Engine(display, MAX_ROTATIONS)
 camera = Camera([0,0], 45)
 asset_map = engine.make_asset_map(ASSET_PATH)
 
-
-
-def distance_from_camera(pos: tuple[int, int]) -> int:
-    rot = math.radians(camera.rotation)
-    sin = math.sin(rot)
-    cos = math.cos(rot)
-    if cos < 0 and sin < 0:
-        return -pos[1] + -pos[0]
-    elif cos < 0:
-        return -pos[1]
-    elif sin < 0:
-        return -pos[0]
-    return pos[1]
-
 size = 24
 map = []
 for y in range(8):
@@ -67,10 +53,10 @@ while True:
     display.fill((0,0,0))
     frame += 1
 
-    for x, y in sorted(map, key=distance_from_camera):
+    for x, y in sorted(map, key=camera.by_furthest_away):
         engine.render_from_matrix(display, cube, (x * size, y * size), 0, camera)
 
-    for x, y in sorted(map, key=distance_from_camera):
+    for x, y in sorted(map, key=camera.by_furthest_away):
         engine.render_from_matrix(display, knight, (x * size, y * size), 0, camera, size)
 
 
