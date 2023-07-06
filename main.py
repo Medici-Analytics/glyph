@@ -182,36 +182,8 @@ while True:
         data = Data(Instructions.CHAT, b'yo, testing')
         sock.sendall(data.serialize())
 
-
-    rotated_movement_vector = movement_vector.rotate(-camera.rotation)
-
-    upscaled_screen_width, upscaled_screen_height = screen.get_size()
-    scale_delta_x = display.get_width() / upscaled_screen_width
-    scale_delta_y = display.get_height() / upscaled_screen_height
-
     camera.offset[0] += int(rotated_movement_vector.x)
     camera.offset[1] += int(rotated_movement_vector.y)
-
-    mouse_x, mouse_y = pygame.mouse.get_pos()
-    camera_rotation_radians = math.radians(camera.rotation)
-
-    offset_x, offset_y = mouse_x - camera.offset[0], mouse_y - camera.offset[1]
-
-    rotated_mouse_x = mouse_x * math.cos(-camera_rotation_radians) - mouse_y * math.sin(-camera_rotation_radians)
-    rotated_mouse_y = mouse_x * math.sin(-camera_rotation_radians) + mouse_y  * math.cos(-camera_rotation_radians)
-
-    absolute_x = int(camera.offset[0] + rotated_mouse_x * scale_delta_x)
-    absolute_y = int(camera.offset[1] + rotated_mouse_y * scale_delta_y)
-
-    cursor = font_renderer.render(f'cursor pos, x: {mouse_x}, y: {mouse_y}', False, (255,255,255))
-    camera_pos = font_renderer.render(f'camera pos, x: {camera.offset[0]}, y: {camera.offset[1]}', False, (255,255,255))
-    mouse_pos = font_renderer.render(f'mouse pos, x: {absolute_x}, y: {absolute_y}', False, (255,255,255))
-
-    display.blit(cursor, (0, display.get_height() - (DEBUG_FONT_SIZE*2 + DEBUG_MARGIN)))
-    display.blit(mouse_pos, (0, display.get_height() - (DEBUG_FONT_SIZE + DEBUG_MARGIN)))
-    display.blit(camera_pos, (0, display.get_height() - (DEBUG_FONT_SIZE*3 + DEBUG_MARGIN)))
-
-    render_from_matrix(display, cube, (absolute_x, absolute_y), 0, camera)
 
     screen.blit(pygame.transform.scale(display, screen.get_size()), (0,0))
     pygame.display.update()
