@@ -10,7 +10,6 @@ def make_socket() -> socket.socket:
     return sock
 
 def handle_connection(sock: socket.socket):
-    print("handling...")
     while True:
         data = sock.recv(1024)
         data = Data.deserialize(data)
