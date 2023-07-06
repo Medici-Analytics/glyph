@@ -90,28 +90,6 @@ while True:
     if keys[pygame.K_ESCAPE]:
         pygame.quit()
 
-    if keys[pygame.K_q]:
-        camera.rotation -= camera.ROTATION_SPEED
-
-    if keys[pygame.K_e]:
-        camera.rotation += camera.ROTATION_SPEED
-
-    movement_speed = 10
-    movement_vector = pygame.Vector2(0, 0)
-    selector_movement_vector = pygame.Vector2(0,0)
-
-    if keys[pygame.K_a]:
-        movement_vector.x -= movement_speed
-
-    if keys[pygame.K_d]:
-        movement_vector.x += movement_speed
-
-    if keys[pygame.K_w]:
-        movement_vector.y -= movement_speed
-
-    if keys[pygame.K_s]:
-        movement_vector.y += movement_speed
-
     if keys[pygame.K_BACKSPACE]:
         data = Data(Instructions.CHAT, b'yo, testing')
         sock.sendall(data.serialize())
@@ -120,13 +98,7 @@ while True:
     selector.update()
     selector.render(display, camera)
 
-    rotated_movement_vector = movement_vector.rotate(-camera.rotation)
-
-    selector.position.x += selector_movement_vector.x
-    selector.position.y += selector_movement_vector.y
-
-    camera.offset[0] += int(rotated_movement_vector.x)
-    camera.offset[1] += int(rotated_movement_vector.y)
+    camera.handle_event(keys)
 
     screen.blit(pygame.transform.scale(display, screen.get_size()), (0,0))
     pygame.display.update()
