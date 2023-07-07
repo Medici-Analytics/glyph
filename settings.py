@@ -1,9 +1,14 @@
 from __future__ import annotations
 
+import struct
+
 from enum import IntEnum, auto
 
 PORT = 2313
 
+class UNPACKERS:
+    CURSOR_POSITION = struct.Struct("iff")
+    GREET = struct.Struct("is")
 
 class END(IntEnum):
     WHITE_MATE = auto()
@@ -20,6 +25,7 @@ class Instructions(IntEnum):
     MOVE = auto()
     MATE = auto()
     INVALID_MOVE = auto()
+    CURSOR_MOVE = auto()
 
 class Data:
     def __init__(self, instruction: Instructions, data: bytes) -> None:

@@ -1,30 +1,31 @@
 #!/usr/bin/python
+from __future__ import annotations
 
 import socket
 import threading
 
-from settings import Data, Instructions, PORT
+from settings import Data
+from settings import PORT
+from settings import Instructions
 
-def make_socket() -> socket.socket:
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    return sock
 
-def handle_connection(sock: socket.socket):
-    while True:
-        data = sock.recv(1024)
-        data = Data.deserialize(data)
-        print(data)
+class Client:
 
-def run(sock: socket.socket) -> None:
-    sock.connect(("localhost", PORT))
-    thread = threading.Thread(target = handle_connection, args=[sock], daemon=True)
-    thread.start()
+    def __init__(self) -> None:
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-if __name__ == "__main__":
-    data = Data(Instructions.GREET, b"Hello, world")
-    sock = make_socket()
+    def handle_connection(self):
+        while True:
+            data = self.sock.recv(1024)
+            data = Data.deserialize(data)
+            print(data)
 
-    sock.send(data.serialize())
-    while True:
-        data = Data(Instructions.CHAT, input().encode())
-        sock.send(data.serialize())
+    def send(self, data: Data) -> None:
+        self.sock.sendall(data.serialize())
+
+    def run(self) -> Client:
+        self.sock.connect(("localhost", PORT))
+        thread = threading.Thread(target = self.handle_connection, daemon=True)
+        thread.start()
+        return self
+
