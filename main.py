@@ -90,10 +90,10 @@ class Game:
     def run(self) -> None:
         try:
             self._run()
-        except:
+        except Exception as e:
             self.client.send_disconnect()
             self.client.stop()
-            sys.exit()
+            raise e
 
 
 if __name__ == "__main__":
