@@ -12,6 +12,10 @@ from settings import Packet
 
 from udpeasy import Client as cl
 
+def decode(str: bytes) -> str:
+    return str.decode().encode().decode()
+
+
 class Client(cl):
 
     def __init__(self, host: str, port: int = PORT) -> None:
@@ -66,18 +70,18 @@ class Client(cl):
 
             if packet.packet_type == PacketType.SEED_NEW_CONNECTION:
                 id, name = PacketPayloadFormat.SEED_NEW_CONNECTION.unpack(packet.payload)
-                name = str(name.decode())
+                name = decode(name)
                 self.connections[id] = name
-                print(self.connections)
 
             if packet.packet_type == PacketType.NEW_PARTICIPANT:
                 id, name = PacketPayloadFormat.NEW_PARTICIPANT.unpack(packet.payload)
-                name = str(name.decode())
+                name = decode(name)
                 self.connections[id] = name
-                print(f'new connection!\n{name} has joined!')
+                print(f'new connection!\t{name} has joined!')
 
             if packet.packet_type == PacketType.DISCONNECT:
                 id, reason = PacketPayloadFormat.DISCONNECT.unpack(packet.payload)
+                print(f'{id}: {self.connections[id]} has disconnected!\treason: {reason}')
                 self.connections.pop(id)
 
             if self.die:
