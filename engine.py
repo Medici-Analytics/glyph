@@ -86,7 +86,7 @@ class Engine:
             for x in range(modified_surface.get_width()):
                 for y in range(modified_surface.get_height()):
                     current_color = modified_surface.get_at((x, y))
-                    if current_color != (0, 0, 0, 0):
+                    if current_color == (255, 255, 255, 255):
                         modified_surface.set_at((x,y), rgb_color)
 
             modified_surfaces[rotation] = modified_surface
