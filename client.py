@@ -54,7 +54,7 @@ class Client(cl):
                 self.dead = True
 
 
-    def start(self):
+    def start(self) -> None:
         thread = threading.Thread(target=self.run_loop, daemon=True)
         thread.start()
 
