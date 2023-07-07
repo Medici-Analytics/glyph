@@ -55,7 +55,7 @@ class Client(cl):
 
 
     def start(self):
-        thread = threading.Thread(target=self.run_loop)
+        thread = threading.Thread(target=self.run_loop, daemon=True)
         thread.start()
 
 if __name__ == "__main__":
