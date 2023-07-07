@@ -75,6 +75,37 @@ class Engine:
         render_y = int(self.display.get_height() // 2 + offset_y - img.get_height() // 2)
 
         surf.blit(img, (render_x, render_y))
+    
+    def change_color(self, surfaces: dict[int, Surface], color: tuple[int, int, int]) -> dict[int, Surface]:
+        modified_surfaces = {}
+        rgb_color = pygame.color.Color(*color)
+
+        for rotation, surface in surfaces.items():
+            modified_surface = surface.copy()
+
+            for x in range(modified_surface.get_width()):
+                for y in range(modified_surface.get_height()):
+                    current_color = modified_surface.get_at((x, y))
+                    if current_color != (0, 0, 0, 0):
+                        modified_surface.set_at((x,y), rgb_color)
+
+            modified_surfaces[rotation] = modified_surface
+
+        return modified_surfaces
+
+    def generate_color_variations(self, surfaces: dict[int, Surface], colors: list[tuple[int, int, int]]) -> list[dict[int, Surface]]:
+        color_variations = []
+
+        for color in colors:
+            modified_surfaces = self.change_color(surfaces, color)
+            color_variations.append(modified_surfaces)
+
+        return color_variations
+
+    def add_to_asset_map(self, asset_map: dict[str, dict[int, Surface]], to_add: list[dict[int, Surface]], names: list[str]) -> None:
+        assert len(to_add) == len(names), "list with new surfaces and names needs to be the same size"
+        for i, name in enumerate(names):
+            asset_map[name] = to_add[i]
 
     def make_asset_map(self, asset_path: str) -> dict[str, dict[int, Surface]]:
         assert asset_path.endswith('/'), "asset path must end with '/' to signify directory path."

@@ -47,6 +47,9 @@ class Game:
         self.cube = self.asset_map['cute_cube']
         self.knight = self.asset_map['chr_knight']
 
+        new_colors = self.engine.generate_color_variations(self.asset_map['selector'], [(255,0,0), (0,255,0), (0,0,255)])
+        self.engine.add_to_asset_map(self.asset_map, new_colors, ['red_selector', 'green_selector', 'blue_selector'])
+
 
     def _run(self) -> None:
         self.client.start()
@@ -81,7 +84,7 @@ class Game:
                 if type(player.position) == tuple:
                     self.engine.render_from_matrix(
                         self.display,
-                        self.asset_map['selector'],
+                        self.asset_map['green_selector'],
                         player.position,
                         0,
                         self.camera,
