@@ -4,11 +4,19 @@ import struct
 
 from enum import IntEnum, auto
 
+from udpeasy import Packet as pckt
+
 PORT = 2313
 
-class UNPACKERS:
+class PacketPayloadFormat:
     CURSOR_POSITION = struct.Struct("iff")
-    GREET = struct.Struct("is")
+    GREET = struct.Struct("32s")
+    JOIN_RESPONSE = struct.Struct('ii')
+    JOIN_REQUEST = struct.Struct('32s')
+
+class ResponseCodes(IntEnum):
+    ACCEPTED = auto()
+    DENIED = auto()
 
 class END(IntEnum):
     WHITE_MATE = auto()
@@ -17,7 +25,9 @@ class END(IntEnum):
     DRAW = auto()
     INSUFFICIENT_MATERIAL = auto()
 
-class Instructions(IntEnum):
+class PacketType(IntEnum):
+    JOIN_REQUEST = auto()
+    JOIN_RESPONSE = auto()
     GREET = auto()
     CHAT = auto()
     DISCONNECT = auto()
@@ -27,16 +37,23 @@ class Instructions(IntEnum):
     INVALID_MOVE = auto()
     CURSOR_MOVE = auto()
 
-class Data:
-    def __init__(self, instruction: Instructions, data: bytes) -> None:
-        self.instructions = instruction
-        self.data = data
+class Packet(pckt):
+    MAGIC_NUMBER = 0x22AF432E
+    def __init__(self, packet_type, sequence_number, payload) -> None:
+        super().__init__(packet_type, sequence_number, payload)
 
-    def serialize(self) -> bytes:
-        return self.instructions.to_bytes() + self.data
+    @classmethod
+    def deserialize(cls, serialized_data) -> Packet:
+        if len(serialized_data) < Packet.HEADER_SIZE:
+            raise ValueError("Invalid packet - packet is too short")
 
-    @staticmethod
-    def deserialize(data: bytes) -> Data:
-        instruction = Instructions((data[0]))
-        data = data[1:]
-        return Data(instruction, data)
+        magic_number, time, packet_type, sequence_number, payload_length = struct.unpack('IIIII', serialized_data[:Packet.HEADER_SIZE])
+
+        if magic_number != Packet.MAGIC_NUMBER:
+            print(magic_number, Packet.MAGIC_NUMBER)
+            raise ValueError("Invalid packet - magic number mis-match of packets. \npacket will be disqualified")
+        payload = serialized_data[Packet.HEADER_SIZE: Packet.HEADER_SIZE+ payload_length]
+
+        packet = Packet(packet_type, sequence_number, payload)
+        packet.time = time
+        return packet

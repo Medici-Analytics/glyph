@@ -8,10 +8,6 @@ from pygame import Vector2
 
 from client import Client
 
-from settings import Instructions
-from settings import Data
-from settings import UNPACKERS
-
 from camera import Camera
 
 from engine import Engine
@@ -46,10 +42,12 @@ class Game:
             for x in range(8):
                 self.map.append((x, y))
 
-        self.client = Client().run()
+        self.client = Client("localhost")
         self.selector = Selector(self.asset_map['green_cube'], Vector2(), self.engine)
         self.cube = self.asset_map['cute_cube']
         self.knight = self.asset_map['chr_knight']
+
+        self.client.start()
 
     def run(self) -> None:
         while True:
@@ -77,10 +75,6 @@ class Game:
             keys = pygame.key.get_pressed()
             if keys[pygame.K_ESCAPE]:
                 pygame.quit()
-
-            if keys[pygame.K_BACKSPACE]:
-                data = Data(Instructions.CHAT, b'yo, testing')
-                self.client.send(data)
 
             self.selector.handle_event(keys, self.camera)
             self.selector.update()

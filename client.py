@@ -1,31 +1,56 @@
 #!/usr/bin/python
 from __future__ import annotations
 
-import socket
-import threading
-
-from settings import Data
 from settings import PORT
-from settings import Instructions
+from settings import PacketType
+from settings import PacketPayloadFormat
+from settings import ResponseCodes
+from settings import Packet
+
+from udpeasy import Client as cl
+
+class Client(cl):
+
+    def __init__(self, host: str, port: int = PORT) -> None:
+        super().__init__(host, port)
+        self.accepted_connection = False
+        self.name: str = "yo"
+
+    def request_join(self) -> None:
+        request_packet = Packet(
+            PacketType.JOIN_REQUEST,
+            self.sequence_number,
+            PacketPayloadFormat.JOIN_REQUEST.pack(self.name.encode())
+        )
+        self.send(request_packet)
+
+    def send(self, packet: Packet) -> None:
+        self.sock.sendto(packet.serialize(), self.addr)
 
 
-class Client:
+    def run_loop(self) -> None:
+        self.request_join()
+        while not self.dead:
+            data, addr = self.sock.recvfrom(1024)
+            packet = Packet.deserialize(data)
 
-    def __init__(self) -> None:
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            if packet.packet_type == PacketType.JOIN_RESPONSE:
+                response, id = PacketPayloadFormat.JOIN_RESPONSE.unpack(packet.payload)
 
-    def handle_connection(self):
-        while True:
-            data = self.sock.recv(1024)
-            data = Data.deserialize(data)
-            print(data)
+                if response == ResponseCodes.ACCEPTED:
+                    self.id = id
+                    self.accepted_connection = True
+                    print(f'connected accepted!\nlogged in with id {id}')
 
-    def send(self, data: Data) -> None:
-        self.sock.sendall(data.serialize())
+                elif response == ResponseCodes.DENIED:
+                    print("connected denied, sadge")
+                    self.stop()
 
-    def run(self) -> Client:
-        self.sock.connect(("localhost", PORT))
-        thread = threading.Thread(target = self.handle_connection, daemon=True)
-        thread.start()
-        return self
+
+            if self.die:
+                self.dead = True
+
+if __name__ == "__main__":
+    server = Client('localhost')
+    server.start()
 
