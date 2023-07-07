@@ -6,6 +6,12 @@ from engine import Engine
 
 from camera import Camera
 
+class MOVEMENT_KEYS:
+    UP = pygame.K_k
+    DOWN = pygame.K_j
+    LEFT = pygame.K_h
+    RIGHT = pygame.K_l
+
 class Selector:
     MOVE_DELAY = 100
     MOVE_INTERVAL = 120
@@ -19,28 +25,29 @@ class Selector:
         self.step_size = step_size
         self.engine = engine
 
+
     def handle_event(self, keys, camera: Camera | None = None) -> None:
-        if keys[pygame.K_LEFT]:
+        if keys[MOVEMENT_KEYS.LEFT]:
             self.movement_vector.x = -self.step_size
 
-        elif keys[pygame.K_RIGHT]:
+        elif keys[MOVEMENT_KEYS.RIGHT]:
             self.movement_vector.x = self.step_size
 
         else:
             self.movement_vector.x = 0
 
-        if keys[pygame.K_UP]:
+        if keys[MOVEMENT_KEYS.UP]:
             self.movement_vector.y = -self.step_size
 
-        elif keys[pygame.K_DOWN]:
+        elif keys[MOVEMENT_KEYS.DOWN]:
             self.movement_vector.y = self.step_size
 
         else:
             self.movement_vector.y = 0
 
-
         if camera != None:
             self.movement_vector = camera.move_relative(self.movement_vector)
+
 
     def update(self) -> None:
         current_time = pygame.time.get_ticks()
