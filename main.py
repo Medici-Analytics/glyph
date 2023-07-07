@@ -48,7 +48,7 @@ class Game:
         self.knight = self.asset_map['chr_knight']
 
 
-    def run(self) -> None:
+    def _run(self) -> None:
         self.client.start()
 
         while True:
@@ -70,7 +70,6 @@ class Game:
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    self.client.stop()
                     pygame.quit()
                     sys.exit()
 
@@ -87,6 +86,15 @@ class Game:
             self.screen.blit(pygame.transform.scale(self.display, self.screen.get_size()), (0,0))
             pygame.display.update()
             self.clock.tick(60)
+
+    def run(self) -> None:
+        try:
+            self._run()
+        except:
+            self.client.send_disconnect()
+            self.client.stop()
+            sys.exit()
+
 
 if __name__ == "__main__":
     game = Game()

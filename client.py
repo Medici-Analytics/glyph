@@ -7,6 +7,7 @@ from settings import PORT
 from settings import PacketType
 from settings import PacketPayloadFormat
 from settings import ResponseCodes
+from settings import DisconnectCodes
 from settings import Packet
 
 from udpeasy import Client as cl
@@ -17,6 +18,7 @@ class Client(cl):
         super().__init__(host, port)
         self.accepted_connection = False
         self.name: str = "yo"
+        self.connections = {}
 
     def request_join(self) -> None:
         request_packet = Packet(
@@ -29,6 +31,15 @@ class Client(cl):
 
     def send(self, packet: Packet) -> None:
         self.sock.sendto(packet.serialize(), self.addr)
+
+
+    def send_disconnect(self, reason: DisconnectCodes = DisconnectCodes.GRACEFUL) -> None:
+        disconnect_packet = Packet(
+            PacketType.DISCONNECT,
+            self.sequence_number,
+            PacketPayloadFormat.DISCONNECT.pack(self.id, reason)
+                                   )
+        self.sock.sendto(disconnect_packet.serialize(), self.addr)
 
 
     def run_loop(self) -> None:
@@ -49,6 +60,25 @@ class Client(cl):
                     print("connected denied, sadge")
                     self.stop()
 
+
+            if not self.accepted_connection:
+                pass
+
+            if packet.packet_type == PacketType.SEED_NEW_CONNECTION:
+                id, name = PacketPayloadFormat.SEED_NEW_CONNECTION.unpack(packet.payload)
+                name = str(name.decode())
+                self.connections[id] = name
+                print(self.connections)
+
+            if packet.packet_type == PacketType.NEW_PARTICIPANT:
+                id, name = PacketPayloadFormat.NEW_PARTICIPANT.unpack(packet.payload)
+                name = str(name.decode())
+                self.connections[id] = name
+                print(f'new connection!\n{name} has joined!')
+
+            if packet.packet_type == PacketType.DISCONNECT:
+                id, reason = PacketPayloadFormat.DISCONNECT.unpack(packet.payload)
+                self.connections.pop(id)
 
             if self.die:
                 self.dead = True

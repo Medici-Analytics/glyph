@@ -12,11 +12,19 @@ class PacketPayloadFormat:
     CURSOR_POSITION = struct.Struct("iff")
     GREET = struct.Struct("32s")
     JOIN_RESPONSE = struct.Struct('ii')
+    DISCONNECT = struct.Struct('ii')
     JOIN_REQUEST = struct.Struct('32s')
+    NEW_PARTICIPANT = struct.Struct('i32s')
+    SEED_NEW_CONNECTION = struct.Struct('i32s')
 
 class ResponseCodes(IntEnum):
     ACCEPTED = auto()
     DENIED = auto()
+
+class DisconnectCodes(IntEnum):
+    TIMEOUT = auto()
+    GRACEFUL = auto()
+    UNEXPECTED = auto()
 
 class END(IntEnum):
     WHITE_MATE = auto()
@@ -28,6 +36,7 @@ class END(IntEnum):
 class PacketType(IntEnum):
     JOIN_REQUEST = auto()
     JOIN_RESPONSE = auto()
+    NEW_PARTICIPANT = auto()
     GREET = auto()
     CHAT = auto()
     DISCONNECT = auto()
@@ -36,6 +45,7 @@ class PacketType(IntEnum):
     MATE = auto()
     INVALID_MOVE = auto()
     CURSOR_MOVE = auto()
+    SEED_NEW_CONNECTION = auto()
 
 class Packet(pckt):
     MAGIC_NUMBER = 0x22AF432E
