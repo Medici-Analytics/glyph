@@ -90,7 +90,7 @@ class Game:
     def run(self) -> None:
         try:
             self._run()
-        except Exception as e:
+        except BaseException as e:
             self.client.send_disconnect()
             self.client.stop()
             raise e
