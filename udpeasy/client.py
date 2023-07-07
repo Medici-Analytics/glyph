@@ -13,6 +13,7 @@ class Client(ABC):
         self.die = False
         self.dead = False
 
+    @abstractmethod
     def start(self):
         thread = threading.Thread(target=self.run_loop())
         thread.start()

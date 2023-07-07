@@ -1,6 +1,8 @@
 #!/usr/bin/python
 from __future__ import annotations
 
+import threading
+
 from settings import PORT
 from settings import PacketType
 from settings import PacketPayloadFormat
@@ -23,6 +25,7 @@ class Client(cl):
             PacketPayloadFormat.JOIN_REQUEST.pack(self.name.encode())
         )
         self.send(request_packet)
+
 
     def send(self, packet: Packet) -> None:
         self.sock.sendto(packet.serialize(), self.addr)
@@ -49,6 +52,11 @@ class Client(cl):
 
             if self.die:
                 self.dead = True
+
+
+    def start(self):
+        thread = threading.Thread(target=self.run_loop)
+        thread.start()
 
 if __name__ == "__main__":
     server = Client('localhost')

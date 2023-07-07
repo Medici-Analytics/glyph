@@ -47,9 +47,10 @@ class Game:
         self.cube = self.asset_map['cute_cube']
         self.knight = self.asset_map['chr_knight']
 
-        self.client.start()
 
     def run(self) -> None:
+        self.client.start()
+
         while True:
             self.display.fill((0,0,0))
 
@@ -69,6 +70,7 @@ class Game:
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
+                    self.client.stop()
                     pygame.quit()
                     sys.exit()
 
