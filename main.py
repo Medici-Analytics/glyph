@@ -43,7 +43,7 @@ class Game:
                 self.map.append((x, y))
 
         self.client = Client("localhost")
-        self.selector = Selector(self.asset_map['green_cube'], Vector2(), self.engine)
+        self.selector = Selector(self.asset_map['selector'], Vector2(), self.engine)
         self.cube = self.asset_map['cute_cube']
         self.knight = self.asset_map['chr_knight']
 
@@ -81,7 +81,7 @@ class Game:
                 if type(player.position) == tuple:
                     self.engine.render_from_matrix(
                         self.display,
-                        self.cube,
+                        self.asset_map['selector'],
                         player.position,
                         0,
                         self.camera,
