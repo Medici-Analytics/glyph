@@ -77,7 +77,7 @@ while True:
         data = Data(Instructions.CHAT, b'yo, testing')
         sock.sendall(data.serialize())
 
-    selector.handle_event(keys)
+    selector.handle_event(keys, camera)
     selector.update()
     selector.render(display, camera)
 

@@ -7,8 +7,8 @@ from engine import Engine
 from camera import Camera
 
 class Selector:
-    MOVE_DELAY = 1400
-    MOVE_INTERVAL = 200
+    MOVE_DELAY = 100
+    MOVE_INTERVAL = 120
     HEIGHT = 24
 
     def __init__(self, asset: dict[int, Surface], position: Vector2, engine: Engine, step_size: int = 24) -> None:
@@ -19,7 +19,7 @@ class Selector:
         self.step_size = step_size
         self.engine = engine
 
-    def handle_event(self, keys) -> None:
+    def handle_event(self, keys, camera: Camera | None = None) -> None:
         if keys[pygame.K_LEFT]:
             self.movement_vector.x = -self.step_size
 
@@ -38,6 +38,9 @@ class Selector:
         else:
             self.movement_vector.y = 0
 
+
+        if camera != None:
+            self.movement_vector = camera.move_relative(self.movement_vector)
 
     def update(self) -> None:
         current_time = pygame.time.get_ticks()

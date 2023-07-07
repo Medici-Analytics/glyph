@@ -1,6 +1,7 @@
 import math
 
 import pygame
+from pygame import Vector2
 
 
 class Camera:
@@ -11,8 +12,29 @@ class Camera:
         self.rotation = rotation
         self.movement_speed = 10
 
+    def move_relative(self, movement: Vector2) -> Vector2:
+        vec = Vector2()
+        rot = self.rotation % 360
+        if -45 <= rot < 45:
+            vec = movement
+        elif 45 <= rot < 135:
+            vec.x = movement.y
+            vec.y = -movement.x
+        elif 135 <= rot < 215:
+            vec.x = -movement.x
+            vec.y = -movement.y
+        elif 215 <= rot < 290:
+            vec.x = -movement.y
+            vec.y = movement.x
+        elif 215 <= rot < 290:
+            vec.x = -movement.y
+            vec.y = -movement.x
+        else:
+            return movement
+        return vec
+
     def handle_event(self, keys) -> None:
-        movement_vector = pygame.Vector2(0, 0)
+        movement_vector = Vector2(0, 0)
         if keys[pygame.K_q]:
             self.rotation -= self.ROTATION_SPEED
 
