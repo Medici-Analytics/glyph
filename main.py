@@ -77,7 +77,20 @@ class Game:
             if keys[pygame.K_ESCAPE]:
                 pygame.quit()
 
+            for id, player in self.client.connections.items():
+                if type(player.position) == tuple:
+                    self.engine.render_from_matrix(
+                        self.display,
+                        self.cube,
+                        player.position,
+                        0,
+                        self.camera,
+                        self.size
+                    )
+
             self.selector.handle_event(keys, self.camera)
+            pos = self.selector.position.x, self.selector.position.y
+            self.client.send_position(pos)
             self.selector.update()
             self.selector.render(self.display, self.camera)
 
