@@ -33,7 +33,7 @@ class Game:
 
         self.clock = pygame.time.Clock()
         self.engine = Engine(self.display, MAX_ROTATIONS)
-        self.camera = Camera([0,0], 45)
+        self.camera = Camera([-100,-300], 45)
         self.asset_map = self.engine.make_asset_map(ASSET_PATH)
 
         self.size = 24

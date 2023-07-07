@@ -38,7 +38,6 @@ class Server(srvr):
 
     def send_other_connections_to_new_connection(self, client_address) -> None:
         for connection in self.connections.values():
-            print(f'sending {connection} to {client_address}')
             packet = Packet(
                 PacketType.SEED_NEW_CONNECTION,
                 0,
@@ -75,7 +74,6 @@ class Server(srvr):
         if packet.packet_type == PacketType.DISCONNECT:
             id, reason = PacketPayloadFormat.DISCONNECT.unpack(packet.payload)
             print(f'disconnect signal recieved from:{client_address}')
-            print(id, reason)
             self.connections.pop(client_address)
             self.broadcast(packet)
 
