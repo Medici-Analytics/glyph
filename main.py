@@ -27,7 +27,7 @@ ASSET_PATH = 'assets/'
 class Game:
     def __init__(self) -> None:
         self.screen = pygame.display.set_mode((1080, 720), 0, 32)
-        self.display = pygame.Surface((600,720))
+        self.display = pygame.Surface((300, 320))
 
         self.font_renderer = pygame.font.SysFont("Arial", DEBUG_FONT_SIZE)
 
@@ -44,7 +44,7 @@ class Game:
 
         self.client = Client("localhost")
         self.selector = Selector(self.asset_map['selector'], Vector2(), self.engine)
-        self.cube = self.asset_map['cute_cube']
+        self.cube = self.asset_map['block']
         self.knight = self.asset_map['chr_knight']
 
         new_colors = self.engine.generate_color_variations(self.asset_map['selector'], [(255,0,0), (0,255,0), (0,0,255)])
